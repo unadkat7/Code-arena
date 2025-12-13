@@ -1,11 +1,10 @@
 import express from "express";
 import path from "path"
 import { ENV } from "./lib/env.js";
+import { connectDB } from "./lib/db.js";
 
 
 const app = express();
-
-const __dirname = path.resolve();
 
 app.get("/health",(req,res)=>{
     res.status(200).json({msg:"api is up and running!"})
@@ -15,6 +14,17 @@ app.get("/books",(req,res)=>{
     res.status(200).json({msg:"booooookkkksss!"})
 })
 
+const startServer = async () => {
+    await connectDB();
+    app.listen(ENV.PORT,async()=>console.log("Server started on port ",ENV.PORT));
+}
+
+startServer();
+
+
+
+
+const __dirname = path.resolve();
 //Make your app ready for deployment
 if(ENV.NODE_ENV === "production"){
     app.use(express.static(path.join(__dirname,"../frontend/dist")));
@@ -22,8 +32,3 @@ if(ENV.NODE_ENV === "production"){
     res.sendFile(path.join(__dirname,"../frontend","dist","index.html"));
 });
 }
-
-
-
-
-app.listen(ENV.PORT,()=> console.log("Server started on port ",ENV.PORT ));
