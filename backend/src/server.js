@@ -3,8 +3,8 @@ import path from "path";
 import cors from "cors";
 import { ENV } from "./lib/env.js";
 import { connectDB } from "./lib/db.js";
-import { requireAuth } from "./middlewares/requireAuth.js";
-import { syncUser } from "./middlewares/syncUser.js";
+import {requireAuth} from "./middleware/requireAuth.js"
+import {syncUser} from "./middleware/syncUser.js"
 
 
 const app = express();
