@@ -1,6 +1,7 @@
 import dotenv from "dotenv";
 
-dotenv.config({ path: "backend/.env" });
+dotenv.config();
+
 
 
 export const ENV =  {
