@@ -1,34 +1,50 @@
 import express from "express";
-import path from "path"
+import path from "path";
+import cors from "cors";
 import { ENV } from "./lib/env.js";
 import { connectDB } from "./lib/db.js";
-
+import { serve } from "inngest/express";
+import { inngest, functions } from "./lib/inngest.js";
 
 const app = express();
+const __dirname = path.resolve();
 
-app.get("/health",(req,res)=>{
-    res.status(200).json({msg:"api is up and running!"})
-})
+// -------------------- MIDDLEWARES --------------------
+app.use(express.json());
+app.use(cors({ origin: ENV.CLIENT_URL, credentials: true }));
 
-app.get("/books",(req,res)=>{
-    res.status(200).json({msg:"booooookkkksss!"})
-})
+// -------------------- INNGEST --------------------
+app.use("/api/inngest", serve({ client: inngest, functions }));
 
-const startServer = async () => {
-    await connectDB();
-    app.listen(ENV.PORT,async()=>console.log("Server started on port ",ENV.PORT));
+// -------------------- API ROUTES --------------------
+app.get("/health", (req, res) => {
+  res.status(200).json({ msg: "api is up and running!" });
+});
+
+app.get("/books", (req, res) => {
+  res.status(200).json({ msg: "booooookkkksss!" });
+});
+
+// -------------------- FRONTEND (PRODUCTION) --------------------
+if (ENV.NODE_ENV === "production") {
+  const frontendPath = path.join(__dirname, "../frontend/dist");
+
+  app.use(express.static(frontendPath));
+
+  app.get("/{*any}", (req, res) => {
+    res.sendFile(path.join(frontendPath, "index.html"));
+  });
 }
+
+// -------------------- START SERVER --------------------
+const startServer = async () => {
+  await connectDB();
+  app.listen(ENV.PORT, () =>
+    console.log("🚀 Server started on port", ENV.PORT)
+  );
+};
 
 startServer();
 
 
 
-
-const __dirname = path.resolve();
-//Make your app ready for deployment
-if(ENV.NODE_ENV === "production"){
-    app.use(express.static(path.join(__dirname,"../frontend/dist")));
-    app.get("/{*any}",(req,res)=>{
-    res.sendFile(path.join(__dirname,"../frontend","dist","index.html"));
-});
-}
