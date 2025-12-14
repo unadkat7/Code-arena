@@ -3,8 +3,9 @@ import path from "path";
 import cors from "cors";
 import { ENV } from "./lib/env.js";
 import { connectDB } from "./lib/db.js";
-import { serve } from "inngest/express";
-import { inngest, functions } from "./lib/inngest.js";
+import { requireAuth } from "./middlewares/requireAuth.js";
+import { syncUser } from "./middlewares/syncUser.js";
+
 
 const app = express();
 const __dirname = path.resolve();
@@ -13,8 +14,6 @@ const __dirname = path.resolve();
 app.use(express.json());
 app.use(cors({ origin: ENV.CLIENT_URL, credentials: true }));
 
-// -------------------- INNGEST --------------------
-app.use("/api/inngest", serve({ client: inngest, functions }));
 
 // -------------------- API ROUTES --------------------
 app.get("/health", (req, res) => {
@@ -24,6 +23,8 @@ app.get("/health", (req, res) => {
 app.get("/books", (req, res) => {
   res.status(200).json({ msg: "booooookkkksss!" });
 });
+
+app.use(requireAuth, syncUser);
 
 // -------------------- FRONTEND (PRODUCTION) --------------------
 if (ENV.NODE_ENV === "production") {
