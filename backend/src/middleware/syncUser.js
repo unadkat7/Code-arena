@@ -12,6 +12,8 @@ export const syncUser = async (req, res, next) => {
 
     // Fetch user from Clerk
     const clerkUser = await clerkClient.users.getUser(clerkUserId);
+    console.log("req.auth:", req.auth);
+
 
     await User.create({
       clerkId: clerkUser.id,
